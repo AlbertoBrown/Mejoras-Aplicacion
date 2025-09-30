@@ -74,7 +74,7 @@
       letter-spacing: 0.01em;
     }
 
-    input[type="text"],
+    select,
     input[type="date"] {
       width: 100%;
       border: 1px solid transparent;
@@ -86,11 +86,23 @@
       transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    input[type="text"]::placeholder {
-      color: rgba(148, 163, 184, 0.65);
+    select {
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, rgba(148, 163, 184, 0.65) 50%),
+        linear-gradient(135deg, rgba(148, 163, 184, 0.65) 50%, transparent 50%);
+      background-position: calc(100% - 22px) calc(50% - 5px), calc(100% - 16px) calc(50% - 5px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 42px;
+      cursor: pointer;
     }
 
-    input[type="text"]:focus,
+    select option {
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    select:focus,
     input[type="date"]:focus {
       outline: none;
       border-color: rgba(56, 189, 248, 0.65);
@@ -238,6 +250,92 @@
       color: #bae6fd;
     }
 
+    .checkin {
+      margin-top: 24px;
+      padding: 22px 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(12px);
+      display: none;
+    }
+
+    .checkin[aria-hidden="false"] {
+      display: block;
+    }
+
+    .checkin-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .checkin-title {
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .checkin-subtitle {
+      font-size: 0.88rem;
+      color: var(--fg-muted);
+    }
+
+    .checkin-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .checkin-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(30, 41, 59, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .checkin-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent-strong);
+      cursor: pointer;
+    }
+
+    .checkin-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: #e2e8f0;
+    }
+
+    .checkin-name {
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .checkin-task {
+      font-size: 0.86rem;
+      color: var(--fg-muted);
+    }
+
+    .checkin-meta {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: rgba(148, 163, 184, 0.8);
+    }
+
+    .checkin-meta time {
+      color: #f8fafc;
+    }
+
     @media (max-width: 480px) {
       .app {
         padding: 28px 22px 32px;
@@ -253,11 +351,17 @@
 <body>
   <main class="app">
     <h1>Turnos de limpieza</h1>
-    <p class="subtitle">Introduce tu nombre (Alberto, Victor, Irene o Murci) y una fecha (AAAA-MM-DD). Te dir  qu  parte de la casa te toca seg n el ciclo de 4 semanas.</p>
+    <p class="subtitle">Selecciona tu nombre (Alberto, Victor, Irene o Murci) y una fecha (AAAA-MM-DD). Te dirá qué parte de la casa te toca según el ciclo de 4 semanas.</p>
 
     <div class="field">
       <label for="nombre">Nombre</label>
-      <input id="nombre" type="text" placeholder="Ej. Alberto" autocomplete="name" />
+      <select id="nombre">
+        <option value="">Selecciona una persona…</option>
+        <option value="Alberto">Alberto</option>
+        <option value="Victor">Victor</option>
+        <option value="Irene">Irene</option>
+        <option value="Murci">Murci</option>
+      </select>
     </div>
 
     <div class="field">
@@ -283,24 +387,34 @@
     <button type="button" onclick="calcularTurno()">Calcular turno</button>
 
     <div id="resultado"></div>
+    <section id="checkin-panel" class="checkin" aria-hidden="true">
+      <div class="checkin-header">
+        <span class="checkin-title">Check-in semanal</span>
+        <span class="checkin-subtitle" id="checkin-week-info"></span>
+        <small>Marca la casilla cuando termines tu tarea. El estado queda guardado en este dispositivo para poder revisarlo después.</small>
+      </div>
+      <ul id="checkin-list" class="checkin-list"></ul>
+    </section>
   </main>
 
   <script>
-    const TAREAS = ["Sal n", "Cocina", "Ba os", "Libre"];
+    const TAREAS = ["Salón", "Cocina", "Baños", "Libre"];
     const CUADRANTE = [
-      ["Alberto", "Irene", "V ctor", "Murci"],
-      ["Murci", "Alberto", "Irene", "V ctor"],
-      ["V ctor", "Murci", "Alberto", "Irene"],
-      ["Irene", "V ctor", "Murci", "Alberto"]
+      ["Alberto", "Irene", "Victor", "Murci"],
+      ["Murci", "Alberto", "Irene", "Victor"],
+      ["Victor", "Murci", "Alberto", "Irene"],
+      ["Irene", "Victor", "Murci", "Alberto"]
     ];
 
     const BASE_DATE_ISO = "2025-09-29";
+    const STORAGE_PREFIX = "turnos-checkin::";
 
     function norm(s) {
       return s
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
     }
 
     function semanasEntre(base, fecha) {
@@ -314,34 +428,136 @@
       return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
 
-    function semanaISO(fecha) {
-      const target = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
-      const dayNr = target.getUTCDay() || 7;
-      target.setUTCDate(target.getUTCDate() + 4 - dayNr);
-      const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
-      return Math.ceil(((target - yearStart) / 86400000 + 1) / 7);
-    }
-
     function setResultado(html, state = "info") {
       const panel = document.getElementById("resultado");
       panel.innerHTML = html;
-      panel.dataset.state = state;
+      if (html) {
+        panel.dataset.state = state;
+      } else {
+        delete panel.dataset.state;
+      }
+    }
+
+    function hideCheckinPanel() {
+      const panel = document.getElementById("checkin-panel");
+      panel.setAttribute("aria-hidden", "true");
+      document.getElementById("checkin-list").innerHTML = "";
+      document.getElementById("checkin-week-info").textContent = "";
+    }
+
+    function getCheckinKey(baseIso, fechaIso) {
+      return `${STORAGE_PREFIX}${baseIso}::${fechaIso}`;
+    }
+
+    function readCheckins(key) {
+      try {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : {};
+      } catch (error) {
+        console.warn("No se pudieron leer los check-in almacenados", error);
+        return {};
+      }
+    }
+
+    function writeCheckins(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (error) {
+        console.warn("No se pudieron guardar los check-in", error);
+      }
+    }
+
+    function formatDateTimeForHuman(date) {
+      return date.toLocaleString("es-ES", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function renderCheckinPanel(idxSemana, fechaIso, baseIso, fechaHumana) {
+      const panel = document.getElementById("checkin-panel");
+      const list = document.getElementById("checkin-list");
+      const weekInfo = document.getElementById("checkin-week-info");
+      const key = getCheckinKey(baseIso, fechaIso);
+      const registros = readCheckins(key);
+
+      list.innerHTML = "";
+      weekInfo.textContent = `Ciclo semana ${idxSemana + 1} · ${fechaHumana}`;
+
+      CUADRANTE[idxSemana].forEach((persona, index) => {
+        const personaKey = norm(persona);
+        const registro = registros[personaKey];
+        const item = document.createElement("li");
+        item.className = "checkin-item";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `checkin-${personaKey}`;
+        checkbox.checked = Boolean(registro?.done);
+
+        checkbox.addEventListener("change", () => {
+          const nuevoRegistro = {
+            done: checkbox.checked,
+            timestamp: checkbox.checked ? new Date().toISOString() : null
+          };
+          const actualizados = { ...readCheckins(key) };
+          if (checkbox.checked) {
+            actualizados[personaKey] = nuevoRegistro;
+          } else {
+            delete actualizados[personaKey];
+          }
+          writeCheckins(key, actualizados);
+          renderCheckinPanel(idxSemana, fechaIso, baseIso, fechaHumana);
+        });
+
+        const label = document.createElement("label");
+        label.className = "checkin-label";
+        label.htmlFor = checkbox.id;
+
+        const nombreSpan = document.createElement("span");
+        nombreSpan.className = "checkin-name";
+        nombreSpan.textContent = persona;
+
+        const tareaSpan = document.createElement("span");
+        tareaSpan.className = "checkin-task";
+        tareaSpan.textContent = `Tarea: ${TAREAS[index]}`;
+
+        label.append(nombreSpan, tareaSpan);
+
+        if (registro?.timestamp) {
+          const meta = document.createElement("div");
+          meta.className = "checkin-meta";
+          const fechaRegistro = new Date(registro.timestamp);
+          meta.innerHTML = `Última actualización: <time datetime="${fechaRegistro.toISOString()}">${formatDateTimeForHuman(fechaRegistro)}</time>`;
+          label.appendChild(meta);
+        }
+
+        item.append(checkbox, label);
+        list.appendChild(item);
+      });
+
+      panel.setAttribute("aria-hidden", "false");
     }
 
     function calcularTurno() {
-      const nombre = document.getElementById("nombre").value.trim();
+      const nombre = document.getElementById("nombre").value;
       const fechaStr = document.getElementById("fecha").value;
       const anchorToggle = document.getElementById("anchor-toggle");
       const anchorStr = document.getElementById("anchor").value;
 
       if (!nombre || !fechaStr) {
-        setResultado("<strong>?? Debes introducir un nombre y una fecha.</strong>", "warning");
+        hideCheckinPanel();
+        setResultado("<strong>⚠️ Debes seleccionar un nombre y una fecha.</strong>", "warning");
         return;
       }
 
       const fecha = parseDateOrNull(fechaStr);
       if (!fecha) {
-        setResultado("<strong>? Fecha inv lida.</strong>", "error");
+        hideCheckinPanel();
+        setResultado("<strong>❌ Fecha inválida.</strong>", "error");
         return;
       }
 
@@ -350,7 +566,8 @@
       if (anchorToggle.checked) {
         const anclada = parseDateOrNull(anchorStr);
         if (!anclada) {
-          setResultado("<strong>?? Activas el anclaje pero la fecha es inv lida.</strong>", "warning");
+          hideCheckinPanel();
+          setResultado("<strong>⚠️ Activas el anclaje pero la fecha es inválida.</strong>", "warning");
           return;
         }
         base = anclada;
@@ -375,14 +592,11 @@
         month: "long",
         day: "numeric"
       });
-
+      const fechaHumana = fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1);
       const fechaISO = fecha.toISOString().slice(0, 10);
-      const isoWeek = semanaISO(fecha);
 
       let html = `<div class="pill accent">Semana ${ciclo} / 4</div>`;
-      html += `<p><strong>Fecha:</strong> ${fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1)}</p>`;
-      html += `<p><strong>Fecha ISO:</strong> ${fechaISO}</p>`;
-      html += `<p><strong>Semana ISO:</strong> ${isoWeek}</p>`;
+      html += `<p><strong>Fecha:</strong> ${fechaHumana}</p>`;
 
       const baseIso = base.toISOString().slice(0, 10);
       const baseHuman = base.toLocaleDateString("es-ES", {
@@ -392,15 +606,17 @@
         day: "numeric"
       });
 
-      html += `<p><strong>Semana 1 anclada:</strong> ${baseHuman.charAt(0).toUpperCase() + baseHuman.slice(1)} <span class="pill">${baseIso}</span></p>`;
+      html += `<p><strong>Semana 1 anclada:</strong> ${baseHuman.charAt(0).toUpperCase() + baseHuman.slice(1)}</p>`;
 
       if (tarea) {
-        html += `<p>? A <strong>${nombre}</strong> le corresponde: <strong>${tarea}</strong>.</p>`;
+        html += `<p>✅ A <strong>${nombre}</strong> le corresponde: <strong>${tarea}</strong>.</p>`;
         setResultado(html, "success");
       } else {
-        html += `<p>? Nombre no encontrado. Usa: Alberto, Irene, V ctor o Murci.</p>`;
+        html += `<p>⚠️ Nombre no encontrado. Usa: Alberto, Irene, Victor o Murci.</p>`;
         setResultado(html, "warning");
       }
+
+      renderCheckinPanel(idxSemana, fechaISO, baseIso, fechaHumana);
     }
   </script>
 </body>
