@@ -60,13 +60,6 @@
       line-height: 1.4;
     }
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-
     label {
       font-weight: 600;
       font-size: 0.95rem;
@@ -74,7 +67,6 @@
       letter-spacing: 0.01em;
     }
 
-    select,
     input[type="date"] {
       width: 100%;
       border: 1px solid transparent;
@@ -86,23 +78,6 @@
       transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
-    select {
-      appearance: none;
-      background-image: linear-gradient(45deg, transparent 50%, rgba(148, 163, 184, 0.65) 50%),
-        linear-gradient(135deg, rgba(148, 163, 184, 0.65) 50%, transparent 50%);
-      background-position: calc(100% - 22px) calc(50% - 5px), calc(100% - 16px) calc(50% - 5px);
-      background-size: 6px 6px, 6px 6px;
-      background-repeat: no-repeat;
-      padding-right: 42px;
-      cursor: pointer;
-    }
-
-    select option {
-      color: var(--fg);
-      background: var(--bg);
-    }
-
-    select:focus,
     input[type="date"]:focus {
       outline: none;
       border-color: rgba(56, 189, 248, 0.65);
@@ -110,127 +85,9 @@
       box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.28);
     }
 
-    .anchor-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 12px;
-    }
-
-    .anchor-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .switch {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      color: var(--fg-muted);
-    }
-
-    .switch input {
-      display: none;
-    }
-
-    .switch-track {
-      position: relative;
-      width: 44px;
-      height: 24px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.25);
-      transition: background 0.25s ease;
-    }
-
-    .switch-handle {
-      position: absolute;
-      top: 3px;
-      left: 4px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #f8fafc;
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.35);
-    }
-
-    .switch input:checked + .switch-track {
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-    }
-
-    .switch input:checked + .switch-track .switch-handle {
-      transform: translateX(18px);
-      background: #ecfeff;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 12px;
-      border: none;
-      border-radius: 16px;
-      padding: 14px 18px;
-      font-size: 1.02rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      color: #0f172a;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.35);
-    }
-
-    button:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-
     small {
       color: var(--fg-muted);
       line-height: 1.4;
-    }
-
-    #resultado {
-      margin-top: 24px;
-      padding: 18px 20px;
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      background: rgba(30, 41, 59, 0.62);
-      backdrop-filter: blur(10px);
-      font-size: 0.98rem;
-      line-height: 1.6;
-      display: none;
-    }
-
-    #resultado[data-state] {
-      display: block;
-    }
-
-    #resultado[data-state="success"] {
-      border-color: rgba(52, 211, 153, 0.45);
-      background: rgba(6, 95, 70, 0.18);
-    }
-
-    #resultado[data-state="error"] {
-      border-color: rgba(248, 113, 113, 0.45);
-      background: rgba(185, 28, 28, 0.16);
-    }
-
-    #resultado[data-state="warning"] {
-      border-color: rgba(251, 191, 36, 0.45);
-      background: rgba(234, 179, 8, 0.16);
-    }
-
-    #resultado strong {
-      color: #f8fafc;
     }
 
     .pill {
@@ -248,6 +105,69 @@
     .pill.accent {
       background: rgba(56, 189, 248, 0.16);
       color: #bae6fd;
+    }
+
+    .summary {
+      margin-top: 12px;
+      padding: 20px 20px 24px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(30, 41, 59, 0.62);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .summary p {
+      margin: 0;
+      font-size: 0.98rem;
+      color: var(--fg);
+    }
+
+    .anchor-editor {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .anchor-editor input[type="date"] {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.75);
+    }
+
+    .people-selector {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .people-button {
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.65);
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .people-button[aria-selected="true"] {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.38));
+      border-color: rgba(56, 189, 248, 0.65);
+      color: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(14, 165, 233, 0.25);
+    }
+
+    .people-button:focus-visible {
+      outline: 2px solid rgba(56, 189, 248, 0.85);
+      outline-offset: 3px;
     }
 
     .checkin {
@@ -342,8 +262,8 @@
         border-radius: 20px;
       }
 
-      button {
-        font-size: 1rem;
+      .people-selector {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   </style>
@@ -351,42 +271,28 @@
 <body>
   <main class="app">
     <h1>Turnos de limpieza</h1>
-    <p class="subtitle">Selecciona tu nombre (Alberto, Victor, Irene o Murci) y una fecha (AAAA-MM-DD). Te dirá qué parte de la casa te toca según el ciclo de 4 semanas.</p>
+    <p class="subtitle">Consulta qué toca esta semana automáticamente con la fecha de hoy. Si necesitas ajustar el punto de partida, cambia la semana 1 anclada y marca el check-in cuando termines tu tarea.</p>
 
-    <div class="field">
-      <label for="nombre">Nombre</label>
-      <select id="nombre">
-        <option value="">Selecciona una persona…</option>
-        <option value="Alberto">Alberto</option>
-        <option value="Victor">Victor</option>
-        <option value="Irene">Irene</option>
-        <option value="Murci">Murci</option>
-      </select>
-    </div>
+    <section id="resumen" class="summary" aria-live="polite">
+      <div class="pill accent" id="resumen-semana"></div>
+      <p id="resumen-fecha"></p>
+      <p id="resumen-anchor"></p>
 
-    <div class="field">
-      <label for="fecha">Fecha</label>
-      <input id="fecha" type="date" />
-    </div>
-
-    <div class="field">
-      <div class="anchor-grid">
-        <label for="anchor">Anclar Semana 1 a</label>
-        <div class="anchor-meta">
-          <input id="anchor" type="date" value="2025-09-29" />
-          <label class="switch">
-            <input id="anchor-toggle" type="checkbox" />
-            <span class="switch-track"><span class="switch-handle"></span></span>
-            Activar
-          </label>
-        </div>
-        <small>Si eliges una fecha distinta y activas el anclaje, esa fecha tiene prioridad. Si no, puedes marcar la casilla para empezar el ciclo desde tu propia fecha.</small>
+      <div class="anchor-editor">
+        <label for="anchor">Cambiar semana 1 anclada</label>
+        <input id="anchor" type="date" value="2025-09-29" />
       </div>
-    </div>
 
-    <button type="button" onclick="calcularTurno()">Calcular turno</button>
+      <div class="people-selector" role="tablist" aria-label="Personas del piso">
+        <button type="button" class="people-button" data-persona="Alberto" role="tab" aria-selected="true">Alberto</button>
+        <button type="button" class="people-button" data-persona="Victor" role="tab" aria-selected="false">Victor</button>
+        <button type="button" class="people-button" data-persona="Irene" role="tab" aria-selected="false">Irene</button>
+        <button type="button" class="people-button" data-persona="Murci" role="tab" aria-selected="false">Murci</button>
+      </div>
 
-    <div id="resultado"></div>
+      <p id="resumen-tarea"></p>
+    </section>
+
     <section id="checkin-panel" class="checkin" aria-hidden="true">
       <div class="checkin-header">
         <span class="checkin-title">Check-in semanal</span>
@@ -408,6 +314,8 @@
 
     const BASE_DATE_ISO = "2025-09-29";
     const STORAGE_PREFIX = "turnos-checkin::";
+    const SELECTED_PERSON_KEY = `${STORAGE_PREFIX}selected-person`;
+    const ANCHOR_STORAGE_KEY = `${STORAGE_PREFIX}anchor-base`;
 
     function norm(s) {
       return s
@@ -426,23 +334,6 @@
       if (!value) return null;
       const parsed = new Date(value + "T00:00:00");
       return Number.isNaN(parsed.getTime()) ? null : parsed;
-    }
-
-    function setResultado(html, state = "info") {
-      const panel = document.getElementById("resultado");
-      panel.innerHTML = html;
-      if (html) {
-        panel.dataset.state = state;
-      } else {
-        delete panel.dataset.state;
-      }
-    }
-
-    function hideCheckinPanel() {
-      const panel = document.getElementById("checkin-panel");
-      panel.setAttribute("aria-hidden", "true");
-      document.getElementById("checkin-list").innerHTML = "";
-      document.getElementById("checkin-week-info").textContent = "";
     }
 
     function getCheckinKey(baseIso, fechaIso) {
@@ -465,6 +356,32 @@
       } catch (error) {
         console.warn("No se pudieron guardar los check-in", error);
       }
+    }
+
+    function getStoredAnchor() {
+      try {
+        return localStorage.getItem(ANCHOR_STORAGE_KEY) || BASE_DATE_ISO;
+      } catch (error) {
+        console.warn("No se pudo recuperar la semana anclada", error);
+        return BASE_DATE_ISO;
+      }
+    }
+
+    function storeAnchor(value) {
+      try {
+        localStorage.setItem(ANCHOR_STORAGE_KEY, value);
+      } catch (error) {
+        console.warn("No se pudo guardar la semana anclada", error);
+      }
+    }
+
+    function getToday() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function capitalise(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
     }
 
     function formatDateTimeForHuman(date) {
@@ -542,82 +459,130 @@
       panel.setAttribute("aria-hidden", "false");
     }
 
-    function calcularTurno() {
-      const nombre = document.getElementById("nombre").value;
-      const fechaStr = document.getElementById("fecha").value;
-      const anchorToggle = document.getElementById("anchor-toggle");
-      const anchorStr = document.getElementById("anchor").value;
+    function getStoredPerson() {
+      try {
+        const stored = localStorage.getItem(SELECTED_PERSON_KEY);
+        return stored || "Alberto";
+      } catch (error) {
+        console.warn("No se pudo recuperar la persona seleccionada", error);
+        return "Alberto";
+      }
+    }
 
-      if (!nombre || !fechaStr) {
-        hideCheckinPanel();
-        setResultado("<strong>⚠️ Debes seleccionar un nombre y una fecha.</strong>", "warning");
-        return;
+    function storeSelectedPerson(persona) {
+      try {
+        localStorage.setItem(SELECTED_PERSON_KEY, persona);
+      } catch (error) {
+        console.warn("No se pudo guardar la persona seleccionada", error);
+      }
+    }
+
+    function updatePeopleButtons(selectedPersona) {
+      document.querySelectorAll(".people-button").forEach((button) => {
+        const isSelected = button.dataset.persona === selectedPersona;
+        button.setAttribute("aria-selected", String(isSelected));
+        button.tabIndex = isSelected ? 0 : -1;
+      });
+    }
+
+    function actualizarVista() {
+      const anchorInput = document.getElementById("anchor");
+      const resumenSemana = document.getElementById("resumen-semana");
+      const resumenFecha = document.getElementById("resumen-fecha");
+      const resumenAnchor = document.getElementById("resumen-anchor");
+      const resumenTarea = document.getElementById("resumen-tarea");
+
+      let base = parseDateOrNull(anchorInput.value) || parseDateOrNull(BASE_DATE_ISO);
+      if (!base) {
+        base = parseDateOrNull(BASE_DATE_ISO);
       }
 
-      const fecha = parseDateOrNull(fechaStr);
-      if (!fecha) {
-        hideCheckinPanel();
-        setResultado("<strong>❌ Fecha inválida.</strong>", "error");
-        return;
+      const baseIso = base.toISOString().slice(0, 10);
+      if (anchorInput.value !== baseIso) {
+        anchorInput.value = baseIso;
       }
+      storeAnchor(baseIso);
 
-      let base = parseDateOrNull(BASE_DATE_ISO);
-
-      if (anchorToggle.checked) {
-        const anclada = parseDateOrNull(anchorStr);
-        if (!anclada) {
-          hideCheckinPanel();
-          setResultado("<strong>⚠️ Activas el anclaje pero la fecha es inválida.</strong>", "warning");
-          return;
-        }
-        base = anclada;
-      }
-
-      const semanasPasadas = semanasEntre(base, fecha);
+      const hoy = getToday();
+      const fechaIso = hoy.toISOString().slice(0, 10);
+      const semanasPasadas = semanasEntre(base, hoy);
       const idxSemana = ((semanasPasadas % 4) + 4) % 4;
       const ciclo = idxSemana + 1;
 
+      const fechaHumana = capitalise(
+        hoy.toLocaleDateString("es-ES", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        })
+      );
+
+      const baseHumana = capitalise(
+        base.toLocaleDateString("es-ES", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        })
+      );
+
+      resumenSemana.textContent = `Semana ${ciclo} / 4`;
+      resumenFecha.innerHTML = `<strong>Fecha:</strong> ${fechaHumana}`;
+      resumenAnchor.innerHTML = `<strong>Semana 1 anclada:</strong> ${baseHumana} <span class="pill">${baseIso}</span>`;
+
+      const personaSeleccionada = getStoredPerson();
+      updatePeopleButtons(personaSeleccionada);
+
       let tarea = null;
-      const nombreNormalizado = norm(nombre);
       for (let j = 0; j < TAREAS.length; j++) {
-        if (norm(CUADRANTE[idxSemana][j]) === nombreNormalizado) {
+        if (norm(CUADRANTE[idxSemana][j]) === norm(personaSeleccionada)) {
           tarea = TAREAS[j];
           break;
         }
       }
 
-      const fechaLarga = fecha.toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
-      const fechaHumana = fechaLarga.charAt(0).toUpperCase() + fechaLarga.slice(1);
-      const fechaISO = fecha.toISOString().slice(0, 10);
-
-      let html = `<div class="pill accent">Semana ${ciclo} / 4</div>`;
-      html += `<p><strong>Fecha:</strong> ${fechaHumana}</p>`;
-
-      const baseIso = base.toISOString().slice(0, 10);
-      const baseHuman = base.toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
-
-      html += `<p><strong>Semana 1 anclada:</strong> ${baseHuman.charAt(0).toUpperCase() + baseHuman.slice(1)}</p>`;
-
       if (tarea) {
-        html += `<p>✅ A <strong>${nombre}</strong> le corresponde: <strong>${tarea}</strong>.</p>`;
-        setResultado(html, "success");
+        resumenTarea.innerHTML = `✅ A <strong>${personaSeleccionada}</strong> le corresponde: <strong>${tarea}</strong>.`;
       } else {
-        html += `<p>⚠️ Nombre no encontrado. Usa: Alberto, Irene, Victor o Murci.</p>`;
-        setResultado(html, "warning");
+        resumenTarea.innerHTML = "⚠️ Selecciona a una persona para ver su tarea.";
       }
 
-      renderCheckinPanel(idxSemana, fechaISO, baseIso, fechaHumana);
+      renderCheckinPanel(idxSemana, fechaIso, baseIso, fechaHumana);
     }
+
+    function inicializar() {
+      const botones = document.querySelectorAll(".people-button");
+      const anchorInput = document.getElementById("anchor");
+      const anchorGuardada = getStoredAnchor();
+      anchorInput.value = parseDateOrNull(anchorGuardada) ? anchorGuardada : BASE_DATE_ISO;
+      const personaInicial = getStoredPerson();
+      updatePeopleButtons(personaInicial);
+
+      botones.forEach((boton) => {
+        boton.addEventListener("click", () => {
+          const persona = boton.dataset.persona;
+          storeSelectedPerson(persona);
+          updatePeopleButtons(persona);
+          actualizarVista();
+        });
+      });
+
+      anchorInput.addEventListener("change", () => {
+        const parsed = parseDateOrNull(anchorInput.value);
+        if (parsed) {
+          storeAnchor(parsed.toISOString().slice(0, 10));
+        }
+        actualizarVista();
+      });
+
+      actualizarVista();
+    }
+
+    document.addEventListener("DOMContentLoaded", inicializar);
   </script>
 </body>
 </html>
+</body>
+</html>
+
