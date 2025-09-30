@@ -60,6 +60,12 @@
       line-height: 1.4;
     }
 
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     label {
       font-weight: 600;
       font-size: 0.95rem;
@@ -129,7 +135,11 @@
       backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+    }
+
+    .summary .pill {
+      align-self: flex-start;
     }
 
     .summary p {
@@ -138,23 +148,8 @@
       color: var(--fg);
     }
 
-    .anchor-editor {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .anchor-editor input[type="date"] {
-      width: 100%;
-      background: rgba(15, 23, 42, 0.75);
-    }
-
-    .person-field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 18px;
+    .summary .field small {
+      font-size: 0.85rem;
     }
 
     .checkin {
@@ -258,24 +253,33 @@
 <body>
   <main class="app">
     <h1>Turnos de limpieza</h1>
-    <p class="subtitle">Consulta qué toca esta semana automáticamente con la fecha de hoy. Si necesitas ajustar el punto de partida, cambia la semana 1 anclada y marca el check-in cuando termines tu tarea.</p>
+    <p class="subtitle">Selecciona tu nombre y una fecha para saber qué tarea te corresponde en el ciclo de 4 semanas. Si cambiáis la semana 1 anclada, se guardará en este dispositivo.</p>
 
     <section id="resumen" class="summary" aria-live="polite">
-      <div class="anchor-editor">
-        <label for="anchor">Cambiar semana 1 anclada</label>
-        <input id="anchor" type="date" value="2025-09-29" />
-      </div>
-
-      <div class="person-field">
+      <div class="field">
         <label for="persona-select">Selecciona tu nombre</label>
         <select id="persona-select">
           <option value="Alberto">Alberto</option>
-          <option value="Victor">Victor</option>
           <option value="Irene">Irene</option>
+          <option value="Víctor">Víctor</option>
           <option value="Murci">Murci</option>
         </select>
       </div>
 
+      <div class="field">
+        <label for="fecha">Elige una fecha</label>
+        <input id="fecha" type="date" />
+      </div>
+
+      <div class="field">
+        <label for="anchor">Semana 1 anclada</label>
+        <input id="anchor" type="date" value="2025-09-29" />
+        <small>El ciclo rota cada 4 semanas. Si cambiáis la fecha anclada, se guardará en este dispositivo.</small>
+      </div>
+
+      <span id="resumen-ciclo" class="pill accent"></span>
+      <p id="resumen-fecha"></p>
+      <p id="resumen-ancla"></p>
       <p id="resumen-tarea"></p>
     </section>
 
@@ -292,16 +296,17 @@
   <script>
     const TAREAS = ["Salón", "Cocina", "Baños", "Libre"];
     const CUADRANTE = [
-      ["Alberto", "Irene", "Victor", "Murci"],
-      ["Murci", "Alberto", "Irene", "Victor"],
-      ["Victor", "Murci", "Alberto", "Irene"],
-      ["Irene", "Victor", "Murci", "Alberto"]
+      ["Alberto", "Irene", "Víctor", "Murci"],
+      ["Murci", "Alberto", "Irene", "Víctor"],
+      ["Víctor", "Murci", "Alberto", "Irene"],
+      ["Irene", "Víctor", "Murci", "Alberto"]
     ];
 
     const BASE_DATE_ISO = "2025-09-29";
     const STORAGE_PREFIX = "turnos-checkin::";
     const SELECTED_PERSON_KEY = `${STORAGE_PREFIX}selected-person`;
     const ANCHOR_STORAGE_KEY = `${STORAGE_PREFIX}anchor-base`;
+    const SELECTED_DATE_KEY = `${STORAGE_PREFIX}selected-date`;
 
     function norm(s) {
       return s
@@ -361,6 +366,23 @@
       }
     }
 
+    function getStoredDate() {
+      try {
+        return localStorage.getItem(SELECTED_DATE_KEY);
+      } catch (error) {
+        console.warn("No se pudo recuperar la fecha seleccionada", error);
+        return null;
+      }
+    }
+
+    function storeSelectedDate(value) {
+      try {
+        localStorage.setItem(SELECTED_DATE_KEY, value);
+      } catch (error) {
+        console.warn("No se pudo guardar la fecha seleccionada", error);
+      }
+    }
+
     function getToday() {
       const now = new Date();
       return new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -388,7 +410,7 @@
       const registros = readCheckins(key);
 
       list.innerHTML = "";
-      weekInfo.textContent = `Ciclo semana ${idxSemana + 1} · ${fechaHumana}`;
+      weekInfo.textContent = `Semana ${idxSemana + 1} / 4 · ${fechaHumana}`;
 
       CUADRANTE[idxSemana].forEach((persona, index) => {
         const personaKey = norm(persona);
@@ -457,6 +479,10 @@
 
     function actualizarVista() {
       const anchorInput = document.getElementById("anchor");
+      const fechaInput = document.getElementById("fecha");
+      const resumenCiclo = document.getElementById("resumen-ciclo");
+      const resumenFecha = document.getElementById("resumen-fecha");
+      const resumenAncla = document.getElementById("resumen-ancla");
       const resumenTarea = document.getElementById("resumen-tarea");
       const selectorPersona = document.getElementById("persona-select");
 
@@ -471,14 +497,28 @@
       }
       storeAnchor(baseIso);
 
-      const hoy = getToday();
-      const fechaIso = hoy.toISOString().slice(0, 10);
-      const semanasPasadas = semanasEntre(base, hoy);
+      let fechaSeleccionada = parseDateOrNull(fechaInput.value);
+      if (!fechaSeleccionada) {
+        fechaSeleccionada = getToday();
+        fechaInput.value = fechaSeleccionada.toISOString().slice(0, 10);
+      }
+      const fechaIso = fechaSeleccionada.toISOString().slice(0, 10);
+      storeSelectedDate(fechaIso);
+
+      const semanasPasadas = semanasEntre(base, fechaSeleccionada);
       const idxSemana = ((semanasPasadas % 4) + 4) % 4;
       const ciclo = idxSemana + 1;
 
       const fechaHumana = capitalise(
-        hoy.toLocaleDateString("es-ES", {
+        fechaSeleccionada.toLocaleDateString("es-ES", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        })
+      );
+      const baseHumana = capitalise(
+        base.toLocaleDateString("es-ES", {
           weekday: "long",
           year: "numeric",
           month: "long",
@@ -486,8 +526,9 @@
         })
       );
 
-      const personaSeleccionada = selectorPersona.value || getStoredPerson();
-      if (selectorPersona.value !== personaSeleccionada) {
+      const personaGuardada = getStoredPerson();
+      const personaSeleccionada = selectorPersona.value || personaGuardada;
+      if (!selectorPersona.value) {
         selectorPersona.value = personaSeleccionada;
       }
 
@@ -497,6 +538,18 @@
           tarea = TAREAS[j];
           break;
         }
+      }
+
+      if (resumenCiclo) {
+        resumenCiclo.textContent = `Semana ${ciclo} / 4`;
+      }
+
+      if (resumenFecha) {
+        resumenFecha.innerHTML = `<strong>Fecha seleccionada:</strong> ${fechaHumana}`;
+      }
+
+      if (resumenAncla) {
+        resumenAncla.innerHTML = `<strong>Semana 1 anclada:</strong> ${baseHumana}`;
       }
 
       if (tarea) {
@@ -510,11 +563,21 @@
 
     function inicializar() {
       const anchorInput = document.getElementById("anchor");
+      const fechaInput = document.getElementById("fecha");
       const selectorPersona = document.getElementById("persona-select");
+
       const anchorGuardada = getStoredAnchor();
       anchorInput.value = parseDateOrNull(anchorGuardada) ? anchorGuardada : BASE_DATE_ISO;
+
+      const fechaGuardada = getStoredDate();
+      const hoyIso = getToday().toISOString().slice(0, 10);
+      fechaInput.value = parseDateOrNull(fechaGuardada) ? fechaGuardada : hoyIso;
+
       const personaInicial = getStoredPerson();
-      selectorPersona.value = personaInicial;
+      const opciones = Array.from(selectorPersona.options).map((option) => option.value);
+      selectorPersona.value = opciones.includes(personaInicial)
+        ? personaInicial
+        : opciones[0] || "Alberto";
 
       selectorPersona.addEventListener("change", () => {
         const persona = selectorPersona.value;
@@ -522,6 +585,14 @@
           localStorage.setItem(SELECTED_PERSON_KEY, persona);
         } catch (error) {
           console.warn("No se pudo guardar la persona seleccionada", error);
+        }
+        actualizarVista();
+      });
+
+      fechaInput.addEventListener("change", () => {
+        const parsed = parseDateOrNull(fechaInput.value);
+        if (parsed) {
+          storeSelectedDate(parsed.toISOString().slice(0, 10));
         }
         actualizarVista();
       });
@@ -539,8 +610,6 @@
 
     document.addEventListener("DOMContentLoaded", inicializar);
   </script>
-</body>
-</html>
 </body>
 </html>
 
